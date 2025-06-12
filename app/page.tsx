@@ -102,7 +102,6 @@ export default function AmapAddressCalculator() {
     setRequestLimit,
     setRequestDelay,
   ]);
-
   // 清除地图标记
   const clearMarkers = useCallback(() => {
     if (userMarkerRef.current) {
@@ -119,7 +118,34 @@ export default function AmapAddressCalculator() {
     }
   }, []);
 
-  // 初始化地图
+  // 自动定位用户位置
+  const autoLocateUser = useCallback(async () => {
+    if (!mapInstance.current) return;
+
+    try {
+      console.log("开始自动定位...");
+      const userPos = await getUserLocation();
+      setUserPosition(userPos);
+
+      // 更新地图中心和缩放级别
+      mapInstance.current.setCenter([userPos.lng, userPos.lat]);
+      mapInstance.current.setZoom(13);
+
+      // 清除之前的用户标记
+      if (userMarkerRef.current) {
+        userMarkerRef.current.setMap(null);
+        userMarkerRef.current = null;
+      }
+
+      // 添加用户位置标记
+      addMarker(userPos, "我的位置", true);
+
+      console.log("自动定位成功:", userPos);
+    } catch (error) {
+      console.warn("自动定位失败:", error);
+      // 定位失败时不显示错误，用户可以手动设置位置或点击查询时再次尝试
+    }
+  }, []); // 初始化地图
   const initMap = useCallback(() => {
     if (mapRef.current && window.AMap && !mapInstance.current) {
       try {
@@ -127,16 +153,27 @@ export default function AmapAddressCalculator() {
           zoom: 11,
           center: [116.397428, 39.90923], // 默认北京
           mapStyle: "amap://styles/normal",
+          // 确保地图交互功能启用
+          dragEnable: true,
+          zoomEnable: true,
+          doubleClickZoom: true,
+          keyboardEnable: true,
+          scrollWheel: true,
+          touchZoom: true,
+          touchZoomCenter: 1,
         });
         setMapInitialized(true);
         setError("");
+
+        // 地图初始化完成后自动进行定位
+        autoLocateUser();
       } catch (err) {
         setError(
           "地图初始化失败：" + (err instanceof Error ? err.message : "未知错误")
         );
       }
     }
-  }, []);
+  }, [autoLocateUser]);
 
   // 加载高德地图API
   const loadAmapScript = useCallback(() => {
@@ -699,19 +736,31 @@ export default function AmapAddressCalculator() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {" "}
               <div>
                 <Label htmlFor="manualLocation">手动设置起始位置（可选）</Label>
-                <Input
-                  id="manualLocation"
-                  placeholder="例如：北京市朝阳区三里屯 或留空使用自动定位"
-                  value={manualLocation}
-                  onChange={(e) => setManualLocation(e.target.value)}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="manualLocation"
+                    placeholder="例如：北京市朝阳区三里屯 或留空使用自动定位"
+                    value={manualLocation}
+                    onChange={(e) => setManualLocation(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={autoLocateUser}
+                    disabled={!mapInitialized}
+                    title="立即定位"
+                  >
+                    📍
+                  </Button>
+                </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  如果自动定位不准确，可以手动输入您的当前位置
+                  如果自动定位不准确，可以手动输入您的当前位置，然后点击"立即定位"按钮更新地图
                 </p>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="requestLimit">请求次数限制</Label>{" "}
@@ -755,7 +804,6 @@ export default function AmapAddressCalculator() {
                   </p>
                 </div>
               </div>
-
               <div className="flex justify-end">
                 <Button
                   variant="outline"
