@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLocalStorage } from "@/lib/hooks/useLocalStorage";
 
 interface AddressResult {
   address: string;
@@ -37,82 +38,70 @@ declare global {
 }
 
 export default function AmapAddressCalculator() {
-  const [addresses, setAddresses] = useState("");
-  const [jsApiKey, setJsApiKey] = useState(""); // JS API Key (用于地图显示)
-  const [restApiKey, setRestApiKey] = useState(""); // REST API Key (用于地址解析)
-  const [securityCode, setSecurityCode] = useState("");
+  const [addresses, setAddresses] = useLocalStorage("amap_addresses", "");
+
+  // 使用 useLocalStorage 管理API密钥
+  const [jsApiKey, setJsApiKey] = useLocalStorage("amap_js_api_key", "");
+  const [restApiKey, setRestApiKey] = useLocalStorage("amap_rest_api_key", "");
+  const [securityCode, setSecurityCode] = useLocalStorage(
+    "amap_security_code",
+    ""
+  );
+
+  // 使用 useLocalStorage 管理位置和配置设置
+  const [manualLocation, setManualLocation] = useLocalStorage(
+    "amap_manual_location",
+    ""
+  );
+  const [requestLimit, setRequestLimit] = useLocalStorage(
+    "amap_request_limit",
+    50
+  );
+  const [requestDelay, setRequestDelay] = useLocalStorage(
+    "amap_request_delay",
+    1000
+  );
+
   const [results, setResults] = useState<AddressResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [mapLoading, setMapLoading] = useState(false);  const [userPosition, setUserPosition] = useState<UserPosition | null>(null);
-  const [manualLocation, setManualLocation] = useState(""); // 手动输入的位置
+  const [mapLoading, setMapLoading] = useState(false);
+  const [userPosition, setUserPosition] = useState<UserPosition | null>(null);
   const [error, setError] = useState("");
   const [mapInitialized, setMapInitialized] = useState(false);
-  const [requestLimit, setRequestLimit] = useState(5); // 请求次数限制，默认5次
-  const [requestDelay, setRequestDelay] = useState(1000); // 请求间隔，默认1秒
 
-  // 密钥保存状态
-  const [keysSaved, setKeysSaved] = useState({
-    jsApi: false,
-    restApi: false,
-    security: false,
-  });
-
+  // 密钥保存状态 - 根据实际值判断
+  const keysSaved = {
+    jsApi: Boolean(jsApiKey),
+    restApi: Boolean(restApiKey),
+    security: Boolean(securityCode),
+  };
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const userMarkerRef = useRef<any>(null);
-  const scriptLoadedRef = useRef(false);
-
-  // 从localStorage加载保存的密钥
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedJsApiKey = localStorage.getItem("amap_js_api_key");
-      const savedRestApiKey = localStorage.getItem("amap_rest_api_key");
-      const savedSecurityCode = localStorage.getItem("amap_security_code");
-
-      if (savedJsApiKey) setJsApiKey(savedJsApiKey);
-      if (savedRestApiKey) setRestApiKey(savedRestApiKey);
-      if (savedSecurityCode) setSecurityCode(savedSecurityCode);
-    }
-  }, []);
-
-  // 检查密钥保存状态
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setKeysSaved({
-        jsApi: !!localStorage.getItem("amap_js_api_key"),
-        restApi: !!localStorage.getItem("amap_rest_api_key"),
-        security: !!localStorage.getItem("amap_security_code"),
-      });
-    }
-  }, [jsApiKey, restApiKey, securityCode]);
-
-  // 保存密钥到localStorage的函数
-  const saveApiKeys = useCallback(() => {
-    if (typeof window !== "undefined") {
-      if (jsApiKey.trim()) {
-        localStorage.setItem("amap_js_api_key", jsApiKey.trim());
-      }
-      if (restApiKey.trim()) {
-        localStorage.setItem("amap_rest_api_key", restApiKey.trim());
-      }
-      if (securityCode.trim()) {
-        localStorage.setItem("amap_security_code", securityCode.trim());
-      }
-    }
-  }, [jsApiKey, restApiKey, securityCode]);
-
-  // 清除保存的密钥
+  const scriptLoadedRef = useRef(false); // 清除保存的密钥
   const clearSavedKeys = useCallback(() => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("amap_js_api_key");
-      localStorage.removeItem("amap_rest_api_key");
-      localStorage.removeItem("amap_security_code");
-    }
     setJsApiKey("");
     setRestApiKey("");
     setSecurityCode("");
-  }, []);
+  }, [setJsApiKey, setRestApiKey, setSecurityCode]);
+
+  // 清除所有保存的设置
+  const clearAllSettings = useCallback(() => {
+    setJsApiKey("");
+    setRestApiKey("");
+    setSecurityCode("");
+    setManualLocation("");
+    setRequestLimit(50);
+    setRequestDelay(1000);
+  }, [
+    setJsApiKey,
+    setRestApiKey,
+    setSecurityCode,
+    setManualLocation,
+    setRequestLimit,
+    setRequestDelay,
+  ]);
 
   // 清除地图标记
   const clearMarkers = useCallback(() => {
@@ -448,18 +437,30 @@ export default function AmapAddressCalculator() {
     setError("");
     setResults([]);
     clearMarkers();
-
     try {
       // 获取用户位置
       const userPos = await getUserLocation();
-      setUserPosition(userPos); // 解析地址列表
+      setUserPosition(userPos);
+
+      // 解析地址列表
       const addressList = addresses
         .split("\n")
         .filter((line) => line.trim() !== "");
+
+      // 检查请求次数限制
+      if (addressList.length > requestLimit) {
+        setError(
+          `地址数量超过限制！最多可处理 ${requestLimit} 个地址，当前输入了 ${addressList.length} 个地址。请减少地址数量或调整限制设置。`
+        );
+        setLoading(false);
+        return;
+      }
+
       const results: AddressResult[] = [];
 
-      // 处理每个地址
-      for (const addr of addressList) {
+      // 处理每个地址（添加延迟避免API频率限制）
+      for (let i = 0; i < addressList.length; i++) {
+        const addr = addressList[i];
         try {
           const location = await geocodeAddress(addr.trim());
           const distance = getDistance(
@@ -476,6 +477,11 @@ export default function AmapAddressCalculator() {
             distance: null,
             error: error instanceof Error ? error.message : "未知错误",
           });
+        }
+
+        // 添加延迟（除了最后一个请求）
+        if (i < addressList.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, requestDelay));
         }
       }
 
@@ -516,11 +522,9 @@ export default function AmapAddressCalculator() {
     } finally {
       setLoading(false);
     }
-  };
-  // 清除所有数据
+  }; // 清除所有数据
   const clearAll = () => {
     setAddresses("");
-    setManualLocation("");
     setResults([]);
     setError("");
     setUserPosition(null);
@@ -590,19 +594,13 @@ export default function AmapAddressCalculator() {
                       💾 已保存
                     </Badge>
                   )}
-                </div>
+                </div>{" "}
                 <Input
                   id="jsApiKey"
                   type="password"
                   placeholder="请输入您的高德地图JS API Key"
                   value={jsApiKey}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setJsApiKey(value);
-                    if (typeof window !== "undefined" && value.trim()) {
-                      localStorage.setItem("amap_js_api_key", value.trim());
-                    }
-                  }}
+                  onChange={(e) => setJsApiKey(e.target.value)}
                 />
               </div>{" "}
               <div>
@@ -615,19 +613,13 @@ export default function AmapAddressCalculator() {
                       💾 已保存
                     </Badge>
                   )}
-                </div>
+                </div>{" "}
                 <Input
                   id="restApiKey"
                   type="password"
                   placeholder="请输入您的高德地图REST API Key"
                   value={restApiKey}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setRestApiKey(value);
-                    if (typeof window !== "undefined" && value.trim()) {
-                      localStorage.setItem("amap_rest_api_key", value.trim());
-                    }
-                  }}
+                  onChange={(e) => setRestApiKey(e.target.value)}
                 />
               </div>{" "}
               <div>
@@ -638,19 +630,13 @@ export default function AmapAddressCalculator() {
                       💾 已保存
                     </Badge>
                   )}
-                </div>
+                </div>{" "}
                 <Input
                   id="securityCode"
                   type="password"
                   placeholder="请输入您的高德地图安全密钥"
                   value={securityCode}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setSecurityCode(value);
-                    if (typeof window !== "undefined" && value.trim()) {
-                      localStorage.setItem("amap_security_code", value.trim());
-                    }
-                  }}
+                  onChange={(e) => setSecurityCode(e.target.value)}
                 />
               </div>
               <p className="text-sm text-gray-500">
@@ -724,6 +710,61 @@ export default function AmapAddressCalculator() {
                 <p className="text-xs text-gray-500 mt-1">
                   如果自动定位不准确，可以手动输入您的当前位置
                 </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="requestLimit">请求次数限制</Label>{" "}
+                  <Input
+                    id="requestLimit"
+                    type="number"
+                    min="1"
+                    max="50"
+                    placeholder="5"
+                    value={requestLimit}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (!isNaN(value) && value >= 1 && value <= 50) {
+                        setRequestLimit(value);
+                      }
+                    }}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    一次最多处理的地址数量
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="requestDelay">请求间隔(毫秒)</Label>{" "}
+                  <Input
+                    id="requestDelay"
+                    type="number"
+                    min="100"
+                    max="5000"
+                    placeholder="1000"
+                    value={requestDelay}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (!isNaN(value) && value >= 100 && value <= 5000) {
+                        setRequestDelay(value);
+                      }
+                    }}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    每次API请求的间隔时间
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAllSettings}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  清除所有保存的设置
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -810,8 +851,8 @@ export default function AmapAddressCalculator() {
                 </div>
               </CardContent>
             </Card>
-          )}        </div>
-        
+          )}{" "}
+        </div>
         {/* 右侧地图区域 */}
         <div className="space-y-4">
           <Card>
@@ -876,7 +917,8 @@ export default function AmapAddressCalculator() {
               </CardContent>
             </Card>
           )}
-        </div>      </div>
+        </div>{" "}
+      </div>
 
       {/* API配置说明 - 放在页面底部 */}
       <Card className="mt-6 border-blue-200 bg-blue-50">
@@ -906,7 +948,7 @@ export default function AmapAddressCalculator() {
           <div className="mt-3 p-2 bg-yellow-100 rounded border-yellow-300 border">
             <p className="text-yellow-800 text-xs">
               💡 <strong>提示：</strong>
-              可以使用同一个Key，但建议分开配置以便独立管理权限和配额。请在
+              请在
               <a
                 href="https://console.amap.com/"
                 target="_blank"
