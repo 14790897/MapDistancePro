@@ -12,6 +12,18 @@ import { useLocalStorage } from "@/lib/hooks/useLocalStorage";
 import Link from "next/link";
 
 export default function SettingsPage() {
+  // 获取环境变量中的默认密钥
+  const defaultJsApiKey = process.env.NEXT_PUBLIC_AMAP_JS_API_KEY || "";
+  const defaultRestApiKey = process.env.NEXT_PUBLIC_AMAP_REST_API_KEY || "";
+  const defaultSecurityCode = process.env.NEXT_PUBLIC_AMAP_SECURITY_CODE || "";
+  const defaultLocation = process.env.NEXT_PUBLIC_DEFAULT_LOCATION || "";
+  const defaultRequestLimit = parseInt(
+    process.env.NEXT_PUBLIC_REQUEST_LIMIT || "50"
+  );
+  const defaultRequestDelay = parseInt(
+    process.env.NEXT_PUBLIC_REQUEST_DELAY || "1000"
+  );
+
   // 使用 useLocalStorage 管理API密钥
   const [jsApiKey, setJsApiKey] = useLocalStorage("amap_js_api_key", "");
   const [restApiKey, setRestApiKey] = useLocalStorage("amap_rest_api_key", "");
@@ -27,25 +39,36 @@ export default function SettingsPage() {
   );
   const [requestLimit, setRequestLimit] = useLocalStorage(
     "amap_request_limit",
-    50
+    defaultRequestLimit
   );
   const [requestDelay, setRequestDelay] = useLocalStorage(
     "amap_request_delay",
-    1000
+    defaultRequestDelay
   );
 
   const [error, setError] = useState("");
 
+  // 获取实际使用的密钥（用户填写的优先，否则使用环境变量默认值）
+  const actualJsApiKey = jsApiKey || defaultJsApiKey;
+  const actualRestApiKey = restApiKey || defaultRestApiKey;
+  const actualSecurityCode = securityCode || defaultSecurityCode;
+
   // 密钥保存状态 - 根据实际值判断
   const keysSaved = {
-    jsApi: Boolean(jsApiKey),
-    restApi: Boolean(restApiKey),
-    security: Boolean(securityCode),
+    jsApi: Boolean(actualJsApiKey),
+    restApi: Boolean(actualRestApiKey),
+    security: Boolean(actualSecurityCode),
   };
 
+  // 是否使用了环境变量默认值
+  const usingDefaults = {
+    jsApi: !jsApiKey && Boolean(defaultJsApiKey),
+    restApi: !restApiKey && Boolean(defaultRestApiKey),
+    security: !securityCode && Boolean(defaultSecurityCode),
+  };
   // API配置测试函数
   const testApiConfig = async () => {
-    if (!jsApiKey.trim() && !restApiKey.trim()) {
+    if (!actualJsApiKey.trim() && !actualRestApiKey.trim()) {
       setError("请至少输入一个API Key进行测试");
       return;
     }
@@ -54,9 +77,9 @@ export default function SettingsPage() {
     let testResults: string[] = [];
 
     // 测试REST API (如果有)
-    if (restApiKey.trim()) {
+    if (actualRestApiKey.trim()) {
       try {
-        const testUrl = `https://restapi.amap.com/v3/geocode/geo?address=北京市天安门&key=${restApiKey}&output=JSON`;
+        const testUrl = `https://restapi.amap.com/v3/geocode/geo?address=北京市天安门&key=${actualRestApiKey}&output=JSON`;
         const response = await fetch(testUrl);
         const data = await response.json();
 
@@ -77,8 +100,8 @@ export default function SettingsPage() {
     }
 
     // 测试JS API (简单验证格式)
-    if (jsApiKey.trim()) {
-      if (jsApiKey.length >= 30) {
+    if (actualJsApiKey.trim()) {
+      if (actualJsApiKey.length >= 30) {
         testResults.push("✅ JS API Key 格式正确");
       } else {
         testResults.push("❌ JS API Key 格式可能不正确");
@@ -109,7 +132,9 @@ export default function SettingsPage() {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <div className="mb-6">        <div className="flex items-center gap-4 mb-4">
+      <div className="mb-6">
+        {" "}
+        <div className="flex items-center gap-4 mb-4">
           <Link href="/">
             <Button variant="outline" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -119,12 +144,16 @@ export default function SettingsPage() {
           <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg">
             <svg viewBox="0 0 32 32" className="w-6 h-6" fill="none">
               <g stroke="white" strokeWidth="2" fill="none">
-                <path d="M6 8L12 6L20 10L26 8V22L20 24L12 20L6 22V8Z" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12 6V20M20 10V24" strokeLinecap="round"/>
+                <path
+                  d="M6 8L12 6L20 10L26 8V22L20 24L12 20L6 22V8Z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path d="M12 6V20M20 10V24" strokeLinecap="round" />
               </g>
               <g fill="white">
-                <circle cx="16" cy="14" r="3" fill="#ef4444"/>
-                <circle cx="16" cy="14" r="1.5" fill="white"/>
+                <circle cx="16" cy="14" r="3" fill="#ef4444" />
+                <circle cx="16" cy="14" r="1.5" fill="white" />
               </g>
             </svg>
           </div>
@@ -133,9 +162,32 @@ export default function SettingsPage() {
             <p className="text-gray-600">配置API密钥和应用参数</p>
           </div>
         </div>
-      </div>
-
+      </div>{" "}
       <div className="space-y-6">
+        {/* 环境变量状态显示 */}
+        {(usingDefaults.jsApi ||
+          usingDefaults.restApi ||
+          usingDefaults.security) && (
+          <Card className="border-blue-200 bg-blue-50">
+            <CardHeader>
+              <CardTitle className="text-blue-800 text-lg">
+                ℹ️ 环境变量配置
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-blue-700">
+              <p className="mb-2">当前正在使用环境变量中的默认配置：</p>
+              <div className="space-y-1">
+                {usingDefaults.jsApi && <p>• JS API Key: 使用默认配置</p>}
+                {usingDefaults.restApi && <p>• REST API Key: 使用默认配置</p>}
+                {usingDefaults.security && <p>• 安全密钥: 使用默认配置</p>}
+              </div>
+              <p className="mt-2 text-xs">
+                你可以在下方输入自己的密钥来覆盖默认配置，留空则继续使用环境变量配置。
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* API配置 */}
         <Card>
           <CardHeader>
@@ -155,16 +207,24 @@ export default function SettingsPage() {
                     💾 已保存
                   </Badge>
                 )}
+                {usingDefaults.jsApi && (
+                  <Badge variant="outline" className="text-xs text-blue-600">
+                    🔧 使用默认值
+                  </Badge>
+                )}
               </div>
               <Input
                 id="jsApiKey"
                 type="password"
-                placeholder="请输入您的高德地图JS API Key"
+                placeholder={
+                  usingDefaults.jsApi
+                    ? "使用环境变量默认值（可选填）"
+                    : "请输入您的高德地图JS API Key"
+                }
                 value={jsApiKey}
                 onChange={(e) => setJsApiKey(e.target.value)}
               />
             </div>
-
             <div>
               <div className="flex items-center gap-2">
                 <Label htmlFor="restApiKey">
@@ -175,16 +235,24 @@ export default function SettingsPage() {
                     💾 已保存
                   </Badge>
                 )}
+                {usingDefaults.restApi && (
+                  <Badge variant="outline" className="text-xs text-blue-600">
+                    🔧 使用默认值
+                  </Badge>
+                )}
               </div>
               <Input
                 id="restApiKey"
                 type="password"
-                placeholder="请输入您的高德地图REST API Key"
+                placeholder={
+                  usingDefaults.restApi
+                    ? "使用环境变量默认值（可选填）"
+                    : "请输入您的高德地图REST API Key"
+                }
                 value={restApiKey}
                 onChange={(e) => setRestApiKey(e.target.value)}
               />
-            </div>
-
+            </div>{" "}
             <div>
               <div className="flex items-center gap-2">
                 <Label htmlFor="securityCode">安全密钥</Label>
@@ -193,16 +261,24 @@ export default function SettingsPage() {
                     💾 已保存
                   </Badge>
                 )}
+                {usingDefaults.security && (
+                  <Badge variant="outline" className="text-xs text-blue-600">
+                    🔧 使用默认值
+                  </Badge>
+                )}
               </div>
               <Input
                 id="securityCode"
                 type="password"
-                placeholder="请输入您的高德地图安全密钥"
+                placeholder={
+                  usingDefaults.security
+                    ? "使用环境变量默认值（可选填）"
+                    : "请输入您的高德地图安全密钥"
+                }
                 value={securityCode}
                 onChange={(e) => setSecurityCode(e.target.value)}
               />
             </div>
-
             <p className="text-sm text-gray-500">
               请在
               <a
@@ -215,7 +291,6 @@ export default function SettingsPage() {
               </a>
               分别申请JS API Key和REST API Key以及安全密钥
             </p>
-
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -356,10 +431,14 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
-
       {error && (
-        <Alert className="mt-4" variant={error.includes("✅") ? "default" : "destructive"}>
-          <AlertDescription className="whitespace-pre-line">{error}</AlertDescription>
+        <Alert
+          className="mt-4"
+          variant={error.includes("✅") ? "default" : "destructive"}
+        >
+          <AlertDescription className="whitespace-pre-line">
+            {error}
+          </AlertDescription>
         </Alert>
       )}
     </div>
