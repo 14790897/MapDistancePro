@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- 地图背景 -->
+  <rect width="32" height="32" rx="6" fill="#2563eb"/>
+  
+  <!-- 地图图标 -->
+  <g stroke="white" stroke-width="1.5" fill="none">
+    <!-- 地图轮廓 -->
+    <path d="M6 8L12 6L20 10L26 8V22L20 24L12 20L6 22V8Z" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- 地图分隔线 -->
+    <path d="M12 6V20M20 10V24" stroke-linecap="round"/>
+  </g>
+  
+  <!-- 位置标记 -->
+  <g fill="white">
+    <circle cx="16" cy="14" r="3" fill="#ef4444"/>
+    <circle cx="16" cy="14" r="1.5" fill="white"/>
+  </g>
+</svg>

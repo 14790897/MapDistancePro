@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none">
+  <!-- 背景圆形 -->
+  <circle cx="8" cy="8" r="8" fill="#2563eb"/>
+  
+  <!-- 地图图标 -->
+  <g stroke="white" stroke-width="1" fill="none">
+    <!-- 简化地图 -->
+    <path d="M3 4L6 3L10 5L13 4V11L10 12L6 10L3 11V4Z" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M6 3V10M10 5V12" stroke-linecap="round"/>
+  </g>
+  
+  <!-- 位置点 -->
+  <circle cx="8" cy="7" r="1.5" fill="#ef4444"/>
+  <circle cx="8" cy="7" r="0.7" fill="white"/>
+</svg>

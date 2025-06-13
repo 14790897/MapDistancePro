@@ -14,6 +14,7 @@ import {
   Download,
   Settings,
 } from "lucide-react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage";
@@ -68,7 +69,6 @@ export default function AmapAddressCalculator() {
   const [userPosition, setUserPosition] = useState<UserPosition | null>(null);
   const [error, setError] = useState("");
   const [mapInitialized, setMapInitialized] = useState(false);
-
   // 密钥保存状态 - 根据实际值判断
   const keysSaved = {
     jsApi: Boolean(jsApiKey),
@@ -79,29 +79,8 @@ export default function AmapAddressCalculator() {
   const mapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const userMarkerRef = useRef<any>(null);
-  const scriptLoadedRef = useRef(false); // 清除保存的密钥
-  const clearSavedKeys = useCallback(() => {
-    setJsApiKey("");
-    setRestApiKey("");
-    setSecurityCode("");
-  }, [setJsApiKey, setRestApiKey, setSecurityCode]);
+  const scriptLoadedRef = useRef(false);
 
-  // 清除所有保存的设置
-  const clearAllSettings = useCallback(() => {
-    setJsApiKey("");
-    setRestApiKey("");
-    setSecurityCode("");
-    setManualLocation("");
-    setRequestLimit(50);
-    setRequestDelay(1000);
-  }, [
-    setJsApiKey,
-    setRestApiKey,
-    setSecurityCode,
-    setManualLocation,
-    setRequestLimit,
-    setRequestDelay,
-  ]);
   // 清除地图标记
   const clearMarkers = useCallback(() => {
     if (userMarkerRef.current) {
@@ -116,36 +95,42 @@ export default function AmapAddressCalculator() {
       });
       markersRef.current = [];
     }
-  }, []);
-
-  // 自动定位用户位置
+  }, []); // 自动定位用户位置
   const autoLocateUser = useCallback(async () => {
-    if (!mapInstance.current) return;
+    if (!mapInstance.current) {
+      console.warn("地图实例不存在，无法进行定位");
+      return;
+    }
 
     try {
       console.log("开始自动定位...");
       const userPos = await getUserLocation();
       setUserPosition(userPos);
 
-      // 更新地图中心和缩放级别
-      mapInstance.current.setCenter([userPos.lng, userPos.lat]);
-      mapInstance.current.setZoom(13);
+      // 确保地图已经完全初始化
+      setTimeout(() => {
+        if (mapInstance.current) {
+          // 更新地图中心和缩放级别
+          mapInstance.current.setCenter([userPos.lng, userPos.lat]);
+          mapInstance.current.setZoom(13);
 
-      // 清除之前的用户标记
-      if (userMarkerRef.current) {
-        userMarkerRef.current.setMap(null);
-        userMarkerRef.current = null;
-      }
+          // 清除之前的用户标记
+          if (userMarkerRef.current) {
+            userMarkerRef.current.setMap(null);
+            userMarkerRef.current = null;
+          }
 
-      // 添加用户位置标记
-      addMarker(userPos, "我的位置", true);
+          // 添加用户位置标记
+          addMarker(userPos, "我的位置", true);
 
-      console.log("自动定位成功:", userPos);
+          console.log("自动定位成功:", userPos);
+        }
+      }, 500); // 延迟500ms确保地图完全加载
     } catch (error) {
       console.warn("自动定位失败:", error);
       // 定位失败时不显示错误，用户可以手动设置位置或点击查询时再次尝试
     }
-  }, []); // 初始化地图
+  }, []);
   const initMap = useCallback(() => {
     if (mapRef.current && window.AMap && !mapInstance.current) {
       try {
@@ -161,12 +146,19 @@ export default function AmapAddressCalculator() {
           scrollWheel: true,
           touchZoom: true,
           touchZoomCenter: 1,
-        });
-        setMapInitialized(true);
-        setError("");
+        }); // 监听地图完全加载事件
+        mapInstance.current.on("complete", () => {
+          console.log("地图加载完成，开始自动定位");
+          console.log("地图实例:", mapInstance.current);
+          console.log("AMap 对象:", window.AMap);
+          setMapInitialized(true);
+          setError("");
 
-        // 地图初始化完成后自动进行定位
-        autoLocateUser();
+          // 地图完全加载后进行定位
+          setTimeout(() => {
+            autoLocateUser();
+          }, 100);
+        });
       } catch (err) {
         setError(
           "地图初始化失败：" + (err instanceof Error ? err.message : "未知错误")
@@ -222,6 +214,15 @@ export default function AmapAddressCalculator() {
       );
     }
   }, [jsApiKey, securityCode, initMap]);
+
+  // 自动加载地图 - 如果有密钥数据就自动加载
+  useEffect(() => {
+    if (jsApiKey && securityCode && !mapInitialized && !mapLoading) {
+      console.log("检测到密钥数据，自动加载地图...");
+      loadAmapScript();
+    }
+  }, [jsApiKey, securityCode, mapInitialized, mapLoading, loadAmapScript]);
+
   // 获取用户当前位置 - 支持多种定位方式
   const getUserLocation = async (): Promise<UserPosition> => {
     // 如果有手动设置的位置，优先使用
@@ -308,52 +309,7 @@ export default function AmapAddressCalculator() {
     });
   };
 
-  // API配置测试函数
-  const testApiConfig = async () => {
-    if (!jsApiKey.trim() && !restApiKey.trim()) {
-      setError("请至少输入一个API Key进行测试");
-      return;
-    }
-
-    setError("");
-    let testResults: string[] = [];
-
-    // 测试REST API (如果有)
-    if (restApiKey.trim()) {
-      try {
-        const testUrl = `https://restapi.amap.com/v3/geocode/geo?address=北京市天安门&key=${restApiKey}&output=JSON`;
-        const response = await fetch(testUrl);
-        const data = await response.json();
-
-        if (data.status === "1") {
-          testResults.push("✅ REST API Key 配置正确");
-        } else {
-          testResults.push(
-            `❌ REST API Key 错误: ${data.info} (${data.infocode})`
-          );
-        }
-      } catch (error) {
-        testResults.push(
-          `❌ REST API 测试失败: ${
-            error instanceof Error ? error.message : "网络错误"
-          }`
-        );
-      }
-    }
-
-    // 测试JS API (简单验证格式)
-    if (jsApiKey.trim()) {
-      if (jsApiKey.length >= 30) {
-        testResults.push("✅ JS API Key 格式正确");
-      } else {
-        testResults.push("❌ JS API Key 格式可能不正确");
-      }
-    }
-
-    setError(testResults.join("\n"));
-  };
-
-  // 地理编码API
+  // 主处理函数
   const geocodeAddress = async (
     address: string
   ): Promise<{ lng: number; lat: number }> => {
@@ -408,9 +364,7 @@ export default function AmapAddressCalculator() {
     s = s * 6378137.0; // 地球半径
     s = Math.round(s * 10000) / 10000;
     return s;
-  };
-
-  // 添加地图标记
+  }; // 添加地图标记
   const addMarker = (
     location: { lng: number; lat: number },
     title: string,
@@ -418,26 +372,92 @@ export default function AmapAddressCalculator() {
   ) => {
     if (mapInstance.current && window.AMap) {
       try {
+        console.log(`添加标记: ${title}`, location, "用户标记:", isUser);
+
+        // 创建自定义图标
+        const createCustomIcon = (color: string) => {
+          return new window.AMap.Icon({
+            size: new window.AMap.Size(25, 34),
+            image: `data:image/svg+xml;base64,${btoa(`
+              <svg width="25" height="34" viewBox="0 0 25 34" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 19.4 12.5 34 12.5 34S25 19.4 25 12.5C25 5.6 19.4 0 12.5 0Z" fill="${color}"/>
+                <circle cx="12.5" cy="12.5" r="8" fill="white"/>
+                <circle cx="12.5" cy="12.5" r="5" fill="${color}"/>
+              </svg>
+            `)}`,
+            imageOffset: new window.AMap.Pixel(-12, -34),
+          });
+        };
+
         const marker = new window.AMap.Marker({
           position: [location.lng, location.lat],
           map: mapInstance.current,
           title: title,
-          icon: isUser
-            ? "https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png"
-            : "https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
+          clickable: true,
+          bubble: true,
+          zIndex: isUser ? 200 : 100,
+          icon: createCustomIcon(isUser ? "#1E40AF" : "#DC2626"), // 蓝色用户，红色地址
+          anchor: "bottom-center",
+        });
+
+        // 添加信息窗口
+        const infoWindow = new window.AMap.InfoWindow({
+          content: `<div style="padding: 8px; font-size: 12px;">${title}</div>`,
+          offset: new window.AMap.Pixel(0, -34),
+        });
+
+        // 添加点击事件
+        marker.on("click", function () {
+          console.log(`点击了标记: ${title}`, location);
+          infoWindow.open(mapInstance.current, marker.getPosition());
+        });
+
+        // 鼠标悬停显示标题
+        marker.on("mouseover", function () {
+          infoWindow.open(mapInstance.current, marker.getPosition());
+        });
+
+        marker.on("mouseout", function () {
+          infoWindow.close();
         });
 
         if (isUser) {
           userMarkerRef.current = marker;
+          console.log("用户标记已添加");
         } else {
           markersRef.current.push(marker);
+          console.log(
+            "地址标记已添加，当前标记总数:",
+            markersRef.current.length
+          );
         }
       } catch (err) {
         console.error("添加标记失败:", err);
+        // 如果自定义图标失败，使用默认标记
+        try {
+          const marker = new window.AMap.Marker({
+            position: [location.lng, location.lat],
+            map: mapInstance.current,
+            title: title,
+            clickable: true,
+            bubble: true,
+            zIndex: isUser ? 200 : 100,
+          });
+
+          if (isUser) {
+            userMarkerRef.current = marker;
+          } else {
+            markersRef.current.push(marker);
+          }
+          console.log("使用默认标记成功");
+        } catch (fallbackErr) {
+          console.error("默认标记也失败:", fallbackErr);
+        }
       }
+    } else {
+      console.warn("地图实例或AMap不存在，无法添加标记");
     }
   };
-
   // 调整地图视野以包含所有标记点
   const fitMapView = (positions: { lng: number; lat: number }[]) => {
     if (mapInstance.current && window.AMap && positions.length > 0) {
@@ -446,7 +466,8 @@ export default function AmapAddressCalculator() {
         positions.forEach((pos) => {
           bounds.extend([pos.lng, pos.lat]);
         });
-        mapInstance.current.setBounds(bounds, false, [20, 20, 20, 20]);
+        // 使用 true 保持地图交互功能，添加边距确保标记不会被遮挡
+        mapInstance.current.setBounds(bounds, true, [20, 20, 20, 20]);
       } catch (err) {
         console.error("调整地图视野失败:", err);
       }
@@ -529,30 +550,45 @@ export default function AmapAddressCalculator() {
         return a.distance - b.distance;
       });
 
-      setResults(results);
-
-      // 更新地图
+      setResults(results); // 更新地图
       if (mapInstance.current) {
+        console.log("开始更新地图标记...");
+
         // 设置地图中心为用户位置
         mapInstance.current.setCenter([userPos.lng, userPos.lat]);
         mapInstance.current.setZoom(12);
 
         // 添加用户位置标记
+        console.log("添加用户位置标记:", userPos);
         addMarker(userPos, "我的位置", true);
 
         // 添加地址标记
         const validPositions = [userPos];
-        results.forEach((result) => {
+        console.log("处理结果数量:", results.length);
+
+        results.forEach((result, index) => {
           if (result.location) {
+            console.log(
+              `添加地址标记 ${index + 1}:`,
+              result.address,
+              result.location
+            );
             addMarker(result.location, result.address);
             validPositions.push(result.location);
           }
         });
+        console.log("有效位置总数:", validPositions.length);
+        console.log(
+          "当前地图上的标记数量:",
+          markersRef.current.length + (userMarkerRef.current ? 1 : 0)
+        );
 
-        // 调整地图视野
-        if (validPositions.length > 1) {
-          fitMapView(validPositions);
-        }
+        // 调整地图视野以显示所有标记
+        // if (validPositions.length > 1) {
+        //   setTimeout(() => {
+        //     fitMapView(validPositions);
+        //   }, 500);
+        // }
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : "处理失败");
@@ -600,101 +636,95 @@ export default function AmapAddressCalculator() {
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
+      {" "}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-center mb-2">
-          批量地址距离计算与地图标注
-        </h1>
-        <p className="text-gray-600 text-center">
-          输入多个地址，自动计算到您当前位置的距离并在地图上标注
-        </p>
+        {" "}
+        <div className="flex items-center justify-between mb-4">
+          {" "}
+          <div className="text-center flex-1">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg">
+                <svg viewBox="0 0 32 32" className="w-8 h-8" fill="none">
+                  <g stroke="white" strokeWidth="2" fill="none">
+                    <path
+                      d="M6 8L12 6L20 10L26 8V22L20 24L12 20L6 22V8Z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path d="M12 6V20M20 10V24" strokeLinecap="round" />
+                  </g>
+                  <g fill="white">
+                    <circle cx="16" cy="14" r="3" fill="#ef4444" />
+                    <circle cx="16" cy="14" r="1.5" fill="white" />
+                  </g>
+                </svg>
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold">
+                <span className="hidden sm:inline">
+                  批量地址距离计算与地图标注
+                </span>
+                <span className="sm:hidden">地址距离计算</span>
+              </h1>
+            </div>
+            <p className="text-gray-600 text-sm md:text-base">
+              输入多个地址，自动计算到您当前位置的距离并在地图上标注
+            </p>
+          </div>
+          <Link href="/settings">
+            <Button variant="outline" size="sm">
+              <Settings className="w-4 h-4 mr-2" />
+              设置
+            </Button>
+          </Link>
+        </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {" "}
         {/* 左侧输入区域 */}
         <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                API配置
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {" "}
-              <div>
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="jsApiKey">
-                    高德地图JS API Key (用于地图显示)
-                  </Label>
-                  {keysSaved.jsApi && (
-                    <Badge variant="secondary" className="text-xs">
-                      💾 已保存
-                    </Badge>
-                  )}
-                </div>{" "}
-                <Input
-                  id="jsApiKey"
-                  type="password"
-                  placeholder="请输入您的高德地图JS API Key"
-                  value={jsApiKey}
-                  onChange={(e) => setJsApiKey(e.target.value)}
-                />
-              </div>{" "}
-              <div>
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="restApiKey">
-                    高德地图REST API Key (用于地址解析)
-                  </Label>
-                  {keysSaved.restApi && (
-                    <Badge variant="secondary" className="text-xs">
-                      💾 已保存
-                    </Badge>
-                  )}
-                </div>{" "}
-                <Input
-                  id="restApiKey"
-                  type="password"
-                  placeholder="请输入您的高德地图REST API Key"
-                  value={restApiKey}
-                  onChange={(e) => setRestApiKey(e.target.value)}
-                />
-              </div>{" "}
-              <div>
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="securityCode">安全密钥</Label>
-                  {keysSaved.security && (
-                    <Badge variant="secondary" className="text-xs">
-                      💾 已保存
-                    </Badge>
-                  )}
-                </div>{" "}
-                <Input
-                  id="securityCode"
-                  type="password"
-                  placeholder="请输入您的高德地图安全密钥"
-                  value={securityCode}
-                  onChange={(e) => setSecurityCode(e.target.value)}
-                />
-              </div>
-              <p className="text-sm text-gray-500">
-                请在
-                <a
-                  href="https://console.amap.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 hover:underline mx-1"
-                >
-                  高德开放平台
-                </a>
-                分别申请JS API Key和REST API Key以及安全密钥
-              </p>{" "}
-              <div className="flex gap-2">
+          {/* 快速开始检查 */}
+          {(!jsApiKey || !restApiKey || !securityCode) && (
+            <Card className="border-orange-200 bg-orange-50">
+              <CardHeader>
+                <CardTitle className="text-orange-800 text-lg">
+                  ⚠️ 配置提醒
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-orange-700">
+                <p className="mb-2">需要先配置API密钥才能使用此功能：</p>
+                <div className="space-y-1">
+                  {!jsApiKey && <p>• 缺少JS API Key（用于地图显示）</p>}
+                  {!restApiKey && <p>• 缺少REST API Key（用于地址解析）</p>}
+                  {!securityCode && <p>• 缺少安全密钥</p>}
+                </div>
+                <div className="mt-3">
+                  <Link href="/settings">
+                    <Button
+                      size="sm"
+                      className="bg-orange-600 hover:bg-orange-700"
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      前往设置
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {/* 地图加载按钮 */}
+          {jsApiKey && securityCode && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  地图初始化
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                 <Button
                   onClick={loadAmapScript}
-                  disabled={
-                    mapLoading || !jsApiKey.trim() || !securityCode.trim()
-                  }
-                  className="flex-1"
+                  disabled={mapLoading || mapInitialized}
+                  className="w-full"
                 >
                   {mapLoading ? (
                     <>
@@ -702,32 +732,14 @@ export default function AmapAddressCalculator() {
                       加载地图中...
                     </>
                   ) : mapInitialized ? (
-                    "地图已加载"
+                    "✅ 地图已加载"
                   ) : (
-                    "加载地图"
+                    "🗺️ 加载地图"
                   )}
                 </Button>
-
-                <Button
-                  variant="outline"
-                  onClick={testApiConfig}
-                  disabled={!jsApiKey.trim() && !restApiKey.trim()}
-                  size="sm"
-                >
-                  测试配置
-                </Button>
-
-                <Button
-                  variant="destructive"
-                  onClick={clearSavedKeys}
-                  size="sm"
-                  title="清除保存的密钥"
-                >
-                  🗑️
-                </Button>
-              </div>
-            </CardContent>
-          </Card>{" "}
+              </CardContent>
+            </Card>
+          )}{" "}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -736,83 +748,34 @@ export default function AmapAddressCalculator() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {" "}
               <div>
-                <Label htmlFor="manualLocation">手动设置起始位置（可选）</Label>
+                <Label htmlFor="currentLocation">当前位置设置</Label>
                 <div className="flex gap-2">
                   <Input
-                    id="manualLocation"
-                    placeholder="例如：北京市朝阳区三里屯 或留空使用自动定位"
-                    value={manualLocation}
-                    onChange={(e) => setManualLocation(e.target.value)}
-                    className="flex-1"
+                    id="currentLocation"
+                    placeholder="自动定位中..."
+                    value={manualLocation || "使用自动定位"}
+                    readOnly
+                    className="flex-1 bg-gray-50"
                   />
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={autoLocateUser}
                     disabled={!mapInitialized}
-                    title="立即定位"
+                    title="重新定位"
                   >
                     📍
                   </Button>
+                  <Link href="/settings">
+                    <Button variant="outline" size="sm" title="位置设置">
+                      ⚙️
+                    </Button>
+                  </Link>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  如果自动定位不准确，可以手动输入您的当前位置，然后点击"立即定位"按钮更新地图
+                  如需修改位置或调整其他参数，请点击设置按钮
                 </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="requestLimit">请求次数限制</Label>{" "}
-                  <Input
-                    id="requestLimit"
-                    type="number"
-                    min="1"
-                    max="50"
-                    placeholder="5"
-                    value={requestLimit}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      if (!isNaN(value) && value >= 1 && value <= 50) {
-                        setRequestLimit(value);
-                      }
-                    }}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    一次最多处理的地址数量
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="requestDelay">请求间隔(毫秒)</Label>{" "}
-                  <Input
-                    id="requestDelay"
-                    type="number"
-                    min="100"
-                    max="5000"
-                    placeholder="1000"
-                    value={requestDelay}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      if (!isNaN(value) && value >= 100 && value <= 5000) {
-                        setRequestDelay(value);
-                      }
-                    }}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    每次API请求的间隔时间
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={clearAllSettings}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  清除所有保存的设置
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -903,9 +866,26 @@ export default function AmapAddressCalculator() {
         </div>
         {/* 右侧地图区域 */}
         <div className="space-y-4">
+          {" "}
           <Card>
             <CardHeader>
-              <CardTitle>地图标注</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>地图标注</CardTitle>
+                {mapInitialized && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // 测试添加标记
+                      const testLocation = { lng: 116.397428, lat: 39.90923 };
+                      addMarker(testLocation, "测试标记", false);
+                      console.log("添加测试标记");
+                    }}
+                  >
+                    测试标记
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <div
@@ -967,50 +947,6 @@ export default function AmapAddressCalculator() {
           )}
         </div>{" "}
       </div>
-
-      {/* API配置说明 - 放在页面底部 */}
-      <Card className="mt-6 border-blue-200 bg-blue-50">
-        <CardHeader>
-          <CardTitle className="text-blue-800 text-lg">
-            📋 API配置说明
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-blue-700 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <p className="font-semibold">🗺️ JS API Key (用于地图显示)</p>
-              <p>• 用于加载和显示高德地图</p>
-              <p>• 需要在控制台启用"Web端(JS API)"服务</p>
-            </div>
-            <div>
-              <p className="font-semibold">🔍 REST API Key (用于地址解析)</p>
-              <p>• 用于地址转换为坐标信息</p>
-              <p>• 需要在控制台启用"Web服务API"</p>
-            </div>
-            <div>
-              <p className="font-semibold">🔐 安全密钥</p>
-              <p>• 提高API访问安全性</p>
-              <p>• 在应用管理中配置数字签名</p>
-            </div>
-          </div>
-          <div className="mt-3 p-2 bg-yellow-100 rounded border-yellow-300 border">
-            <p className="text-yellow-800 text-xs">
-              💡 <strong>提示：</strong>
-              请在
-              <a
-                href="https://console.amap.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline mx-1"
-              >
-                高德开放平台控制台
-              </a>
-              申请相应的API密钥。
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
       {error && (
         <Alert className="mt-4" variant="destructive">
           <AlertDescription>{error}</AlertDescription>
