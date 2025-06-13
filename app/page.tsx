@@ -382,7 +382,7 @@ export default function AmapAddressCalculator() {
                 <circle cx="12.5" cy="12.5" r="5" fill="${color}"/>
               </svg>
             `)}`,
-            imageOffset: new window.AMap.Pixel(-12, -34),
+            // imageOffset: new window.AMap.Pixel(-12, -34),
           });
         };
         const marker = new window.AMap.Marker({
@@ -392,7 +392,9 @@ export default function AmapAddressCalculator() {
           clickable: true,
           bubble: true,
           zIndex: isUser ? 200 : 100,
-          icon: createCustomIcon(isUser ? "#1E40AF" : "#DC2626"), // 蓝色用户，红色地址
+          icon: isUser
+            ? "https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png" // 蓝色
+            : "https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png", // 红色
         });
 
         // 添加信息窗口
