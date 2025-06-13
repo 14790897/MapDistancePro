@@ -128,12 +128,19 @@ export default function AmapAddressCalculator() {
   }, []); // 自动定位用户位置
   const autoLocateUser = useCallback(async () => {
     if (!mapInstance.current) {
-      console.warn("地图实例不存在，无法进行定位");
+      setError("⏳ 定位失败：地图实例尚未加载完成，请稍候...");
       return;
     }
+    // if (!mapInitialized) {
+    //   setError("⏳ 请先等待地图初始化完成再进行定位。");
+    //   return;
+    // }
+
+    setLoading(true);
+    setError("");
 
     try {
-      console.log("开始自动定位...");
+      console.log("开始定位...");
       const userPos = await getUserLocation();
       setUserPosition(userPos);
 
@@ -151,15 +158,24 @@ export default function AmapAddressCalculator() {
         // 添加用户位置标记
         addMarker(userPos, "我的位置", true);
 
-        console.log("自动定位成功:", userPos);
+        console.log("定位成功:", userPos);
+
+        // 根据定位方式显示不同的成功消息
+        if (manualLocation.trim()) {
+          setError(""); // 清除错误，成功时不显示消息
+        } else {
+          setError(""); // 清除错误
+        }
       }
     } catch (error) {
-      console.warn("自动定位失败:", error);
-      setError(
-        error instanceof Error ? error.message : "自动定位失败，请手动设置位置"
-      );
+      const errMsg = error instanceof Error ? error.message : "未知错误";
+      console.warn("定位失败:", errMsg);
+      setError(`📍❌ 定位失败：${errMsg}`);
+      setUserPosition(null);
+    } finally {
+      setLoading(false);
     }
-  }, [mapInitialized]);
+  }, [mapInitialized, manualLocation]);
   const initMap = useCallback(() => {
     if (mapRef.current && window.AMap && !mapInstance.current) {
       try {
@@ -367,8 +383,7 @@ export default function AmapAddressCalculator() {
         }
       );
     });
-  };
-  // 主处理函数
+  }; // 地址解析函数
   const geocodeAddress = async (
     address: string
   ): Promise<{ lng: number; lat: number }> => {
@@ -379,25 +394,32 @@ export default function AmapAddressCalculator() {
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`HTTP错误: ${response.status}`);
+        throw new Error(
+          `🚫 HTTP错误 ${response.status}：无法连接到地址解析服务。`
+        );
       }
 
       const data = await response.json();
 
       if (data.status === "1" && data.geocodes && data.geocodes.length > 0) {
-        const loc = data.geocodes[0].location.split(",");
-        return {
-          lng: Number.parseFloat(loc[0]),
-          lat: Number.parseFloat(loc[1]),
-        };
+        const locationStr = data.geocodes[0].location;
+        if (typeof locationStr === "string" && locationStr.includes(",")) {
+          const loc = locationStr.split(",");
+          return {
+            lng: Number.parseFloat(loc[0]),
+            lat: Number.parseFloat(loc[1]),
+          };
+        } else {
+          throw new Error("🗺️ 地址解析服务返回的坐标格式不正确。");
+        }
       } else {
-        throw new Error(data.info || "未找到地址坐标");
+        throw new Error(
+          `🗺️❌ 未找到"${address}"的位置信息，请检查地址是否正确。`
+        );
       }
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`地址解析失败: ${error.message}`);
-      }
-      throw new Error("地址解析失败");
+      const errMsg = error instanceof Error ? error.message : "未知错误";
+      throw new Error(`❓ 地址"${address}"解析失败：${errMsg}`);
     }
   };
 
@@ -496,7 +518,10 @@ export default function AmapAddressCalculator() {
           );
         }
       } catch (err) {
-        console.error("添加标记失败:", err);
+        const errMsg = err instanceof Error ? err.message : "未知错误";
+        console.error("添加标记失败:", errMsg);
+        setError(`📍❌ 添加地图标记失败：${errMsg}`);
+
         // 如果自定义图标失败，使用默认标记
         try {
           const marker = new window.AMap.Marker({
@@ -515,14 +540,15 @@ export default function AmapAddressCalculator() {
           }
           console.log("使用默认标记成功");
         } catch (fallbackErr) {
-          console.error("默认标记也失败:", fallbackErr);
+          const fallbackErrMsg =
+            fallbackErr instanceof Error ? fallbackErr.message : "未知错误";
+          console.error("默认标记也失败:", fallbackErrMsg);
+          setError(`📍❌ 添加标记完全失败：${fallbackErrMsg}`);
         }
       }
     } else {
-      console.warn("地图实例或AMap不存在，无法添加标记", {
-        mapInstance: mapInstance.current,
-        AMap: window.AMap,
-      });
+      console.warn("地图实例或AMap不存在，无法添加标记");
+      setError("🚧 无法添加标记：地图尚未初始化或AMap对象不可用。");
     }
   };
   // 调整地图视野以包含所有标记点
@@ -842,36 +868,60 @@ export default function AmapAddressCalculator() {
                 <MapPin className="w-5 h-5" />
                 位置设置
               </CardTitle>
-            </CardHeader>
+            </CardHeader>{" "}
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="currentLocation">当前位置设置</Label>
+                <Label htmlFor="manualLocationInput">手动输入我的位置</Label>
                 <div className="flex gap-2">
                   <Input
-                    id="currentLocation"
-                    placeholder="自动定位中..."
-                    value={manualLocation || "使用自动定位"}
-                    readOnly
-                    className="flex-1 bg-gray-50"
+                    id="manualLocationInput"
+                    placeholder="例如：北京市海淀区中关村大街1号"
+                    value={manualLocation}
+                    onChange={(e) => setManualLocation(e.target.value)}
+                    className="flex-1"
                   />
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={autoLocateUser}
+                    onClick={() => {
+                      setError("");
+                      autoLocateUser();
+                    }}
                     disabled={!mapInitialized}
-                    title="重新定位"
+                    title="使用当前输入的位置或重新自动定位"
                   >
                     📍
                   </Button>
-                  <Link href="/settings">
-                    <Button variant="outline" size="sm" title="位置设置">
-                      ⚙️
-                    </Button>
-                  </Link>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  如需修改位置或调整其他参数，请点击设置按钮
+                  💡 输入具体地址可提高定位精度，留空则使用自动定位
                 </p>
+              </div>
+
+              {userPosition && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                  <p className="text-sm text-green-800 font-medium mb-1">
+                    📍 当前位置
+                  </p>
+                  <div className="text-xs text-green-700 space-y-1">
+                    <p>经度: {userPosition.lng.toFixed(6)}</p>
+                    <p>纬度: {userPosition.lat.toFixed(6)}</p>
+                    {manualLocation.trim() && (
+                      <p className="text-blue-700">
+                        <strong>来源:</strong> 手动设置 ({manualLocation})
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Link href="/settings" className="flex-1">
+                  <Button variant="outline" size="sm" className="w-full">
+                    <Settings className="w-4 h-4 mr-2" />
+                    高级设置
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -999,35 +1049,8 @@ export default function AmapAddressCalculator() {
                   </div>
                 ) : null}
               </div>
-            </CardContent>
+            </CardContent>{" "}
           </Card>{" "}
-          {userPosition && (
-            <Card>
-              <CardHeader>
-                <CardTitle>当前位置信息</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <p className="text-gray-600">
-                    <strong>经度:</strong> {userPosition.lng.toFixed(6)}
-                  </p>
-                  <p className="text-gray-600">
-                    <strong>纬度:</strong> {userPosition.lat.toFixed(6)}
-                  </p>
-                  {manualLocation.trim() && (
-                    <p className="text-blue-600">
-                      <strong>位置来源:</strong> 手动设置 ({manualLocation})
-                    </p>
-                  )}
-                  <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                    <p className="text-yellow-800 text-xs">
-                      💡 如果位置不准确，请在"位置设置"中手动输入您的实际位置
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
           {mapInitialized && (
             <Card>
               <CardHeader>
