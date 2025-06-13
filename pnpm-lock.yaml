@@ -89,6 +89,9 @@ dependencies:
   '@radix-ui/react-tooltip':
     specifier: 1.1.6
     version: 1.1.6(@types/react-dom@19.1.6)(@types/react@19.1.8)(react-dom@19.1.0)(react@19.1.0)
+  '@uiw/react-amap':
+    specifier: ^7.1.8
+    version: 7.1.8(react-dom@19.1.0)(react@19.1.0)
   autoprefixer:
     specifier: ^10.4.20
     version: 10.4.21(postcss@8.5.5)
@@ -178,6 +181,10 @@ packages:
   /@alloc/quick-lru@5.2.0:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  /@amap/amap-jsapi-loader@1.0.1:
+    resolution: {integrity: sha512-nPyLKt7Ow/ThHLkSvn2etQlUzqxmTVgK7bIgwdBRTg2HK5668oN7xVxkaiRe3YZEzGzfV2XgH5Jmu2T73ljejw==}
+    dev: false
 
   /@babel/runtime@7.27.6:
     resolution: {integrity: sha512-vbavdySgbTTrmFE+EsiqUTzlOr5bzlnJtUv9PynGCAKvfQqjIXbvFdumPM/GxMDfyuGMJaJAU6TO4zc1Jf1i8Q==}
@@ -1848,6 +1855,429 @@ packages:
     resolution: {integrity: sha512-AwAfQ2Wa5bCx9WP8nZL2uMZWod7J7/JSplxbTmBQ5ms6QpqNYm672H0Vu9ZVKVngQ+ii4R/byguVEUZQyeg44g==}
     dependencies:
       csstype: 3.1.3
+
+  /@uiw/react-amap-api-loader@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-0tWpzxRgkKE3HdUvtEs+2tPiciYQ8OrPF/LbHDwYpODP8UlGbAhl8J76ykPysnw8h/5YMyDa+XodabBcYuchIQ==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@amap/amap-jsapi-loader': 1.0.1
+      '@uiw/react-amap-require-script': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-auto-complete@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-ffRWr35FOruu3KTJyeTLRbDA+kVx2OtOy+DwFMZzJE7OXDUogu/zV73n/JaLzzoBRdj9LgvQgsCDcEfhtLwMcQ==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-bezier-curve@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-BYt2a1HljUj5v4OB5xaBFN0hO4bKBWc4RbdrfAv6yNQkhND1OLOPLLCl60G9ZJXaaK40E+z8MHFF+gYVdxVzlg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-circle-marker@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-mgEeKxk9Su6p8raPgWgm2PvS5/AP/DbDaCeKV+jaCS7xlaWfKVv5y2UbfTo56uIlCbwgi67fz8C+92KBYpEbJg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-circle@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-E5F2Xidejavrk70Qo2DkaieeC7iglnVB6kMUdwmJ5RNGumjvoILUy5ARh2xHoYZtMyrrFu+JOYf5+odHBrVnMQ==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-context-menu@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-d5TUmangcu76MTnTw5BnhuEnXVio18Zv/945r7AqV3ySJ/aL2o2rAngEkvWNrZxPBSeA43I74/2Uh5jTerLVyg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-control-bar-control@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-NNpjtPXfbV+IVte3VfBBYW4eicRNlA3rwIxd2ZEeMnckPzdVGr8l4JM0+Zq1mBTcBeWbMdxCHrPjLgyJfv0L7g==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-ellipse@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-LZZqNXrRM276Pf2tWyVQ1upjElaMcwiH7PrCrCqDR0ipunwzvoD5h12Yb6vNhUaUuEuPI0AquLDjWDw6seVAGA==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-geolocation@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-Akm7M6jwOPTF6wNSLe7Qz1lOW5dEaNA1pkbs/NZ7uXfZq6/5sYYe+/Ph6QGtmfbGj4ciyobfBjonzs5MUrXU5A==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-hawk-eye-control@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-EQ74TQACE17DBsmyys9SEP8HqP5epzvon9oaDWF00iZLHUJsEOFEAgIrlBFZzU8IS66n+uONicrXyiatM8NDqw==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-info-window@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-GaBR540Prq8VROg4ZyrStnX0i5oud6BJNPMf5F4XpndjIJGZzhhoHYjdvlRZdtX6hgXRPXAlMJi427r98+jaBA==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-label-marker@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-KI/SUQqiXKtZkwVhYN0mbp6jYIRvgWPXgMIxLYjJiCO/YlOxf23OIrXIid4GqxUwvaCuVbvoVS/IByIju71rPg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-map-type-control@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-k+bF4WqMAn0BNMEPtX9IIzYvhP7KgdMXKXgrAf6Bflk6v3Js/H8ZOqUdhHlMKMUtEWg5S1scy8E+HSMtvQ05GA==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-map@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-13Bp1onlDZGg7h5Ri+zXxMGZnXx2xPIhOCLgk20xQyCtioLF+3dmitIOOWhrGhkZjkhISLU+4CAMMlalhGJz+w==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-marker@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-GSxbhfUBDNupp5VeMB8kWDww+YBJ2Axd1oAP5snZ2MAdiFfmoIr5zgZYilXVwYE9vNxV8JOzV3Mf/viFTGwh2w==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-mass-marks@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-1CIkzYvvyp7lCpY0smaLVV65GB+PXqeNOxjucQZIK6qKvSCFTn9t5+2UAIh2ELaybSAPlStlCzPLbHLncwDTEA==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-mouse-tool@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-XdN0RNkWeQOrMVzS3Qcg7akoehA35s8fTmI7PfO6T6wgPwk4auwfPoS7Np8a/yITJhwZlRuynyoAf1hcGwl5Mg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-poly-editor@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-nn6w0Yz+1w9/S04Y8gF4x7oP+CtSKGRz0XPjzN24UVjBs+v07GUYRYHvMOzaDX5Ktk8Cxb34b3AG+ZkR9PUkow==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-polygon': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-polyline': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-polygon-editor@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-fxpr5tbjLJ2gK5JrD23P1221V89RYLORvhO0TkGyw9cDayn46tGsqGDknOvvO2fF2sSWVS4lbjEn3/YJrGpV3A==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-polygon': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-polygon@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-SjrwoW4Q25CATV9ZvU23eKR14KaCxwIU0jPsoumokQ17kcuqi2maoiIcIh/7p9QCIs2j0whTfX81sSuf9Ax3dA==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-polyline-editor@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-I8/Fwel+Q2aAqyVURCwplQIl4MKsXJDbgJv+OUBzXss3sG/S+ObKwzWYiOQOH6EUlaqLh+KAlXGxlyQzFs/iZg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-polyline': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-polyline@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-Lmfb3NZ4VVeJ5x5gSUtdl6/jpFeD+dldKq3tLhj69jhGZGZxh2vKHto/bVKqtx1YV0KiktYodlOP+v3xO0TCmg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-rectangle@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-ofKFj5MuPTnY6NXR6ZRSEqgPmIC7DutzlwjhK+cAujh2KpXAjzXl7JmS1kGyoiKKX9RR8y1z7EM+IQMrRMdSlg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-require-script@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-84Ed3DNois4kYSd/H3xQ7j/U+3SJjrOdgNeFJMa39KVlnmpbWSmxUSJjn1tzh7ZKFssahGGNULI4gEjU5Mz/Xg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-scale-control@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-Q41T+s8YJF0AXdG4IECRTFMjxYQ2LqCNRaUMkoOq2NmXky81i24j4JqP+zO9hObtEz6DT+gc10uYAxqKWTSt9g==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-text@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-5UxqIDaYIhRnRybdyWRS/S0R5tumvv9MY6DmTHXXxP6rhvN6r2CCmzUtMgMlEspMHRWeAeUgPKrcLbhMRIxvuA==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-tile-layer@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-SO7HUjxNpErZwqd/x65uxkTK4VjB0Vx8ugBmzMQGyXxPFsE1lBLyFIFB6PpmerMyGMpfnb0XOxD4sH60DB2xfQ==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-tool-bar-control@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-yswup0DF1sb+0eJk8oVItumWVPWnumD1RsM5xOvbpc7iIWbNFwH6TPWsjNaKp7Vt0Bv/QVXJwhJE/H8X5Z/CJg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-types@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-3hRsm8hbhvGXjIP9HV3n31yx8y/SbxmtPIJnQhuK50VZ3PlkjX/k8M3h/+CtDkH62aoUGnNYgOHTsGtJAtFpEg==}
+    peerDependencies:
+      react: ^18.0.0
+      react-dom: ^18.0.0
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-utils@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-NZnYXBANjNhAt53alBpDwGCWb9ZTW9dcTUrPeDK0blRTGqxGQ86hk+eB721t7495Emx1BGj/STawiIB7M3NQgQ==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap-weather@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-2y61rqi/0u6Kqi551YOS0LMGygZhr1v9vtnSjmA8XE5Re/AdZv38xmPocXqMmidaoNzyjBnRzKIhsawJ/EeBqA==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
+  /@uiw/react-amap@7.1.8(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-u8A5C84YbKmfQX6JWEilzXYZK1+HGZUAtVdVFBMUPCl33vyvhpM1ZVkM31JCXfWeaQN4cfLY/wpuGsSRL1/oqw==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@uiw/react-amap-api-loader': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-auto-complete': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-bezier-curve': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-circle': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-circle-marker': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-context-menu': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-control-bar-control': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-ellipse': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-geolocation': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-hawk-eye-control': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-info-window': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-label-marker': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-map': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-map-type-control': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-marker': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-mass-marks': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-mouse-tool': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-poly-editor': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-polygon': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-polygon-editor': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-polyline': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-polyline-editor': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-rectangle': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-require-script': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-scale-control': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-text': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-tile-layer': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-tool-bar-control': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-types': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-utils': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      '@uiw/react-amap-weather': 7.1.8(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
 
   /ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
