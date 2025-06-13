@@ -107,30 +107,29 @@ export default function AmapAddressCalculator() {
       const userPos = await getUserLocation();
       setUserPosition(userPos);
 
-      // 确保地图已经完全初始化
-      setTimeout(() => {
-        if (mapInstance.current) {
-          // 更新地图中心和缩放级别
-          mapInstance.current.setCenter([userPos.lng, userPos.lat]);
-          mapInstance.current.setZoom(13);
+      if (mapInstance.current) {
+        // 更新地图中心和缩放级别
+        mapInstance.current.setCenter([userPos.lng, userPos.lat]);
+        mapInstance.current.setZoom(13);
 
-          // 清除之前的用户标记
-          if (userMarkerRef.current) {
-            userMarkerRef.current.setMap(null);
-            userMarkerRef.current = null;
-          }
-
-          // 添加用户位置标记
-          addMarker(userPos, "我的位置", true);
-
-          console.log("自动定位成功:", userPos);
+        // 清除之前的用户标记
+        if (userMarkerRef.current) {
+          userMarkerRef.current.setMap(null);
+          userMarkerRef.current = null;
         }
-      }, 500); // 延迟500ms确保地图完全加载
+
+        // 添加用户位置标记
+        addMarker(userPos, "我的位置", true);
+
+        console.log("自动定位成功:", userPos);
+      }
     } catch (error) {
       console.warn("自动定位失败:", error);
-      // 定位失败时不显示错误，用户可以手动设置位置或点击查询时再次尝试
+      setError(
+        error instanceof Error ? error.message : "自动定位失败，请手动设置位置"
+      );
     }
-  }, []);
+  }, [mapInitialized]);
   const initMap = useCallback(() => {
     if (mapRef.current && window.AMap && !mapInstance.current) {
       try {
@@ -155,9 +154,7 @@ export default function AmapAddressCalculator() {
           setError("");
 
           // 地图完全加载后进行定位
-          setTimeout(() => {
-            autoLocateUser();
-          }, 100);
+          autoLocateUser();
         });
       } catch (err) {
         setError(
@@ -388,7 +385,6 @@ export default function AmapAddressCalculator() {
             imageOffset: new window.AMap.Pixel(-12, -34),
           });
         };
-
         const marker = new window.AMap.Marker({
           position: [location.lng, location.lat],
           map: mapInstance.current,
@@ -397,7 +393,6 @@ export default function AmapAddressCalculator() {
           bubble: true,
           zIndex: isUser ? 200 : 100,
           icon: createCustomIcon(isUser ? "#1E40AF" : "#DC2626"), // 蓝色用户，红色地址
-          anchor: "bottom-center",
         });
 
         // 添加信息窗口
