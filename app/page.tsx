@@ -372,19 +372,19 @@ export default function AmapAddressCalculator() {
         console.log(`添加标记: ${title}`, location, "用户标记:", isUser);
 
         // 创建自定义图标
-        const createCustomIcon = (color: string) => {
-          return new window.AMap.Icon({
-            size: new window.AMap.Size(25, 34),
-            image: `data:image/svg+xml;base64,${btoa(`
-              <svg width="25" height="34" viewBox="0 0 25 34" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 19.4 12.5 34 12.5 34S25 19.4 25 12.5C25 5.6 19.4 0 12.5 0Z" fill="${color}"/>
-                <circle cx="12.5" cy="12.5" r="8" fill="white"/>
-                <circle cx="12.5" cy="12.5" r="5" fill="${color}"/>
-              </svg>
-            `)}`,
-            // imageOffset: new window.AMap.Pixel(-12, -34),
-          });
-        };
+        // const createCustomIcon = (color: string) => {
+        //   return new window.AMap.Icon({
+        //     size: new window.AMap.Size(25, 34),
+        //     image: `data:image/svg+xml;base64,${btoa(`
+        //       <svg width="25" height="34" viewBox="0 0 25 34" xmlns="http://www.w3.org/2000/svg">
+        //         <path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 19.4 12.5 34 12.5 34S25 19.4 25 12.5C25 5.6 19.4 0 12.5 0Z" fill="${color}"/>
+        //         <circle cx="12.5" cy="12.5" r="8" fill="white"/>
+        //         <circle cx="12.5" cy="12.5" r="5" fill="${color}"/>
+        //       </svg>
+        //     `)}`,
+        //     // imageOffset: new window.AMap.Pixel(-12, -34),
+        //   });
+        // };
         const marker = new window.AMap.Marker({
           position: [location.lng, location.lat],
           map: mapInstance.current,
@@ -392,6 +392,7 @@ export default function AmapAddressCalculator() {
           clickable: true,
           bubble: true,
           zIndex: isUser ? 200 : 100,
+          anchor: "center",
           icon: isUser
             ? "https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png" // 蓝色
             : "https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png", // 红色
