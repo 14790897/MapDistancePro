@@ -1038,7 +1038,7 @@ export default function AmapAddressCalculator() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>地图标注</CardTitle>
-                {mapInitialized && (
+                {/* {mapInitialized && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -1051,7 +1051,7 @@ export default function AmapAddressCalculator() {
                   >
                     测试标记
                   </Button>
-                )}
+                )} */}
               </div>
             </CardHeader>
             <CardContent>
