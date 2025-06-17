@@ -729,6 +729,8 @@ export default function AmapAddressCalculator() {
     link.download = "地址距离计算结果.csv";
     link.click();
   };
+  const actualRequestLimit = requestLimit || defaultRequestLimit;
+  const actualRequestDelay = requestDelay || defaultRequestDelay;
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">

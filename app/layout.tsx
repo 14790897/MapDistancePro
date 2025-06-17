@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import ChatwootWidget from "@/components/ChatwootWidget";
 
 export const metadata: Metadata = {
   title: "批量地址距离计算 - 高德地图工具",
@@ -42,7 +43,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ChatwootWidget />
+      </body>
     </html>
   );
 }
