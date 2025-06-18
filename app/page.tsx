@@ -13,6 +13,7 @@ import {
   Trash2,
   Download,
   Settings,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -786,14 +787,26 @@ export default function AmapAddressCalculator() {
               <span className="text-gray-300">•</span>
               <span className="text-xs text-gray-400">开源项目</span>
             </div>
-          </div>
+          </div>{" "}
           <div className="flex flex-col gap-2">
-            <Link href="/settings">
-              <Button variant="outline" size="sm">
-                <Settings className="w-4 h-4 mr-2" />
-                设置
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link href="/promo">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 hover:bg-gradient-to-r hover:from-blue-100 hover:to-purple-100"
+                >
+                  <Star className="w-4 h-4 mr-2 text-blue-600" />
+                  <span className="text-blue-700">产品介绍</span>
+                </Button>
+              </Link>
+              <Link href="/settings">
+                <Button variant="outline" size="sm">
+                  <Settings className="w-4 h-4 mr-2" />
+                  设置
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
