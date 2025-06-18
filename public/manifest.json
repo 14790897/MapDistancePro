@@ -1,13 +1,21 @@
 {
-  "name": "批量地址距离计算工具",
-  "short_name": "地址距离计算",
-  "description": "基于高德地图API的批量地址距离计算与地图标注应用",
+  "name": "MapDistancePro - 批量地址距离计算工具",
+  "short_name": "MapDistancePro",
+  "description": "基于高德地图API的专业批量地址距离计算与地图标注应用，支持自动定位、距离排序、CSV导出。免费开源，适用于房地产、物流、市场调研等多种场景。",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
   "orientation": "portrait-primary",
-  "categories": ["navigation", "utilities", "productivity"],
+  "categories": [
+    "navigation",
+    "utilities",
+    "productivity",
+    "business"
+  ],
+  "lang": "zh-CN",
+  "scope": "/",
+  "id": "mapdistancepro",
   "icons": [
     {
       "src": "/favicon.svg",
@@ -19,6 +27,29 @@
       "src": "/icon.svg",
       "sizes": "32x32",
       "type": "image/svg+xml"
+    },
+    {
+      "src": "/placeholder-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/placeholder-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "/placeholder.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "platform": "wide",
+      "label": "MapDistancePro应用界面"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }
