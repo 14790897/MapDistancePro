@@ -1,10 +1,21 @@
 # 快速部署指南
 
-## 环境变量推送到Vercel
+本指南将帮助您将 MapDistancePro 部署到 Vercel 生产环境。
 
-### 方法一：使用npm脚本（推荐）
+## 前置条件
 
-```powershell
+确保您已经：
+- 完成了 [环境变量配置](./ENV_CONFIG.md)
+- 获取了高德地图 API 密钥
+- 创建了 Vercel 账号
+
+## 部署步骤
+
+### 1. 环境变量推送到Vercel
+
+**方法一：使用npm脚本（推荐）**
+
+```bash
 # 推送到生产环境
 pnpm run env:push
 
@@ -18,7 +29,7 @@ pnpm run env:push:preview
 pnpm run env:push:dev
 ```
 
-### 方法二：直接使用PowerShell脚本
+**方法二：直接使用PowerShell脚本**
 
 ```powershell
 # 推送到生产环境
@@ -32,30 +43,13 @@ pnpm run env:push:dev
 .\push-env.ps1 -Development
 ```
 
-### 方法三：手动使用Vercel CLI
+**方法三：手动使用Vercel CLI**
 
-```powershell
-# 安装Vercel CLI
-npm i -g vercel
+详细命令参考 [Vercel命令指南](./VERCEL_COMMANDS.md)
 
-# 登录
-vercel login
+### 2. 部署项目
 
-# 链接项目
-vercel link
-
-# 手动添加环境变量
-vercel env add NEXT_PUBLIC_AMAP_JS_API_KEY production
-vercel env add NEXT_PUBLIC_AMAP_REST_API_KEY production
-vercel env add NEXT_PUBLIC_AMAP_SECURITY_CODE production
-vercel env add NEXT_PUBLIC_DEFAULT_LOCATION production
-vercel env add NEXT_PUBLIC_REQUEST_LIMIT production
-vercel env add NEXT_PUBLIC_REQUEST_DELAY production
-```
-
-## 部署项目
-
-```powershell
+```bash
 # 部署到生产环境
 pnpm run deploy
 
@@ -67,7 +61,7 @@ vercel --prod
 vercel
 ```
 
-## 验证部署
+### 3. 验证部署
 
 1. 检查Vercel Dashboard中的环境变量设置
 2. 访问部署后的网站，确认功能正常
@@ -83,3 +77,12 @@ A: 修改环境变量后需要重新部署才能生效
 
 **Q: 密钥暴露在浏览器？**
 A: NEXT_PUBLIC_* 前缀的变量会暴露到客户端，这是正常的，高德地图API需要在客户端使用
+
+**Q: 如何检查部署状态？**
+A: 访问 [Vercel Dashboard](https://vercel.com/dashboard) 查看部署状态和日志
+
+## 相关链接
+
+- [环境变量配置完整指南](./ENV_CONFIG.md)
+- [Vercel命令参考](./VERCEL_COMMANDS.md)
+- [SEO优化配置](./SEO_GUIDE.md)
