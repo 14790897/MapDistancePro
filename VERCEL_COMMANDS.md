@@ -16,16 +16,16 @@ vercel link
 
 ```powershell
 # JS API Key
-echo "89dd9a1afc15e80083ca4673807cd3bb" | vercel env add NEXT_PUBLIC_AMAP_JS_API_KEY production --force
+echo "your_js_api_key_here" | vercel env add NEXT_PUBLIC_AMAP_JS_API_KEY production --force
 
 # REST API Key
-echo "748def3642c8b92810edd33f072760c2" | vercel env add NEXT_PUBLIC_AMAP_REST_API_KEY production --force
+echo "your_rest_api_key_here" | vercel env add NEXT_PUBLIC_AMAP_REST_API_KEY production --force
 
 # 安全密钥
-echo "7ad9cacaa164bc1f6c29bd90b5e496aa" | vercel env add NEXT_PUBLIC_AMAP_SECURITY_CODE production --force
+echo "your_security_code_here" | vercel env add NEXT_PUBLIC_AMAP_SECURITY_CODE production --force
 
 # 默认位置
-echo "鹤沙航城" | vercel env add NEXT_PUBLIC_DEFAULT_LOCATION production --force
+echo "北京市" | vercel env add NEXT_PUBLIC_DEFAULT_LOCATION production --force
 
 # 请求限制
 echo "50" | vercel env add NEXT_PUBLIC_REQUEST_LIMIT production --force
@@ -48,10 +48,10 @@ vercel --prod
 
 ```powershell
 # 推送到development, preview, production
-echo "89dd9a1afc15e80083ca4673807cd3bb" | vercel env add NEXT_PUBLIC_AMAP_JS_API_KEY
-echo "748def3642c8b92810edd33f072760c2" | vercel env add NEXT_PUBLIC_AMAP_REST_API_KEY
-echo "7ad9cacaa164bc1f6c29bd90b5e496aa" | vercel env add NEXT_PUBLIC_AMAP_SECURITY_CODE
-echo "鹤沙航城" | vercel env add NEXT_PUBLIC_DEFAULT_LOCATION
+echo "your_js_api_key_here" | vercel env add NEXT_PUBLIC_AMAP_JS_API_KEY
+echo "your_rest_api_key_here" | vercel env add NEXT_PUBLIC_AMAP_REST_API_KEY
+echo "your_security_code_here" | vercel env add NEXT_PUBLIC_AMAP_SECURITY_CODE
+echo "北京市" | vercel env add NEXT_PUBLIC_DEFAULT_LOCATION
 echo "50" | vercel env add NEXT_PUBLIC_REQUEST_LIMIT
 echo "1000" | vercel env add NEXT_PUBLIC_REQUEST_DELAY
 ```
