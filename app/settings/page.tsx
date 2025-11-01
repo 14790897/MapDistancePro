@@ -332,25 +332,53 @@ export default function SettingsPage() {
               </p>
             </div>
 
+            {/* 请求限制说明卡片 */}
+            {(jsApiKey || restApiKey) && (
+              <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <div className="text-green-600 mt-0.5">🎯</div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-green-800 mb-1">
+                      使用自有API - 高级功能已解锁
+                    </p>
+                    <p className="text-xs text-green-700 leading-relaxed">
+                      检测到您已配置自己的API密钥，请求次数限制已从默认的 <strong>50个地址/次</strong> 提升至
+                      <strong className="text-green-900"> 1000个地址/次</strong>。您可以在下方自定义具体的限制数值，适合处理大批量地址数据。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="requestLimit">请求次数限制</Label>
+                <div className="flex items-center gap-2 mb-1">
+                  <Label htmlFor="requestLimit">请求次数限制</Label>
+                  {(jsApiKey || restApiKey) && (
+                    <Badge variant="outline" className="text-xs text-green-600 border-green-300">
+                      ✓ 自有API
+                    </Badge>
+                  )}
+                </div>
                 <Input
                   id="requestLimit"
                   type="number"
                   min="1"
-                  max="50"
-                  placeholder="50"
+                  max={jsApiKey || restApiKey ? 1000 : 50}
+                  placeholder={jsApiKey || restApiKey ? "建议100-1000" : "50"}
                   value={requestLimit}
                   onChange={(e) => {
                     const value = parseInt(e.target.value);
-                    if (!isNaN(value) && value >= 1 && value <= 50) {
+                    const maxLimit = jsApiKey || restApiKey ? 1000 : 50;
+                    if (!isNaN(value) && value >= 1 && value <= maxLimit) {
                       setRequestLimit(value);
                     }
                   }}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  一次最多处理的地址数量（1-50）
+                  {jsApiKey || restApiKey
+                    ? "自有API: 可设置 1-1000 个地址/次"
+                    : "默认API: 限制 1-50 个地址/次"}
                 </p>
               </div>
 
@@ -412,6 +440,13 @@ export default function SettingsPage() {
                 <p>• 提高API访问安全性</p>
                 <p>• 在应用管理中配置数字签名</p>
               </div>
+            </div>
+            <div className="mt-3 p-3 bg-green-100 rounded border-green-300 border">
+              <p className="text-green-800 text-xs">
+                🎯 <strong>自有API优势：</strong>
+                配置自己的API密钥后，请求限制将从默认的 <strong>50个地址/次</strong> 提升至
+                <strong> 1000个地址/次</strong>，适合处理大批量地址数据。
+              </p>
             </div>
             <div className="mt-3 p-2 bg-yellow-100 rounded border-yellow-300 border">
               <p className="text-yellow-800 text-xs">
