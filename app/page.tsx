@@ -42,45 +42,16 @@ declare global {
 export default function AmapAddressCalculator() {
   const [addresses, setAddresses] = useLocalStorage("amap_addresses", "");
 
-  // 获取环境变量中的默认密钥
-  const defaultJsApiKey = process.env.NEXT_PUBLIC_AMAP_JS_API_KEY || "";
-  const defaultRestApiKey = process.env.NEXT_PUBLIC_AMAP_REST_API_KEY || "";
-  const defaultSecurityCode = process.env.NEXT_PUBLIC_AMAP_SECURITY_CODE || "";
-  const defaultLocation = process.env.NEXT_PUBLIC_DEFAULT_LOCATION || "";
-  const defaultRequestLimit = parseInt(
-    process.env.NEXT_PUBLIC_REQUEST_LIMIT || "50"
-  );
-  const defaultRequestDelay = parseInt(
-    process.env.NEXT_PUBLIC_REQUEST_DELAY || "1000"
-  );
-
-  // 使用 useLocalStorage 管理API密钥，如果用户没有填写则使用默认值
-  const [jsApiKey, setJsApiKey] = useLocalStorage(
-    "amap_js_api_key",
-    defaultJsApiKey
-  );
-  const [restApiKey, setRestApiKey] = useLocalStorage(
-    "amap_rest_api_key",
-    defaultRestApiKey
-  );
-  const [securityCode, setSecurityCode] = useLocalStorage(
-    "amap_security_code",
-    defaultSecurityCode
-  );
+  // 使用 useLocalStorage 管理API密钥 - 用户必须自行配置
+  const [jsApiKey, setJsApiKey] = useLocalStorage("amap_js_api_key", "");
+  const [restApiKey, setRestApiKey] = useLocalStorage("amap_rest_api_key", "");
+  const [securityCode, setSecurityCode] = useLocalStorage("amap_security_code", "");
 
   // 使用 useLocalStorage 管理位置和配置设置
-  const [manualLocation, setManualLocation] = useLocalStorage(
-    "amap_manual_location",
-    defaultLocation
-  );
-  const [requestLimit, setRequestLimit] = useLocalStorage(
-    "amap_request_limit",
-    defaultRequestLimit
-  );
-  const [requestDelay, setRequestDelay] = useLocalStorage(
-    "amap_request_delay",
-    defaultRequestDelay
-  );
+  const [manualLocation, setManualLocation] = useLocalStorage("amap_manual_location", "");
+  const [requestLimit, setRequestLimit] = useLocalStorage("amap_request_limit", 50);
+  const [requestDelay, setRequestDelay] = useLocalStorage("amap_request_delay", 1000);
+
   const [results, setResults] = useState<AddressResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [mapLoading, setMapLoading] = useState(false);
@@ -88,23 +59,11 @@ export default function AmapAddressCalculator() {
   const [error, setError] = useState("");
   const [mapInitialized, setMapInitialized] = useState(false);
 
-  // 获取实际使用的密钥（用户填写的优先，否则使用环境变量默认值）
-  const actualJsApiKey = jsApiKey || defaultJsApiKey;
-  const actualRestApiKey = restApiKey || defaultRestApiKey;
-  const actualSecurityCode = securityCode || defaultSecurityCode;
-
-  // 密钥保存状态 - 根据实际值判断
+  // 密钥保存状态
   const keysSaved = {
-    jsApi: Boolean(actualJsApiKey),
-    restApi: Boolean(actualRestApiKey),
-    security: Boolean(actualSecurityCode),
-  };
-
-  // 是否使用了环境变量默认值
-  const usingDefaults = {
-    jsApi: !jsApiKey && Boolean(defaultJsApiKey),
-    restApi: !restApiKey && Boolean(defaultRestApiKey),
-    security: !securityCode && Boolean(defaultSecurityCode),
+    jsApi: Boolean(jsApiKey),
+    restApi: Boolean(restApiKey),
+    security: Boolean(securityCode),
   };
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
@@ -212,7 +171,7 @@ export default function AmapAddressCalculator() {
   }, [autoLocateUser]);
   // 加载高德地图API
   const loadAmapScript = useCallback(() => {
-    if (!actualJsApiKey.trim() || !actualSecurityCode.trim()) {
+    if (!jsApiKey.trim() || !securityCode.trim()) {
       setError("请输入JS API Key和安全密钥");
       return;
     }
@@ -228,12 +187,12 @@ export default function AmapAddressCalculator() {
     try {
       // 设置安全密钥
       window._AMapSecurityConfig = {
-        securityJsCode: actualSecurityCode,
+        securityJsCode: securityCode,
       };
 
       // 创建并加载脚本
       const script = document.createElement("script");
-      script.src = `https://webapi.amap.com/maps?v=2.0&key=${actualJsApiKey}`;
+      script.src = `https://webapi.amap.com/maps?v=2.0&key=${jsApiKey}`;
       script.onload = () => {
         scriptLoadedRef.current = true;
         setMapLoading(false);
@@ -256,12 +215,12 @@ export default function AmapAddressCalculator() {
         "地图API加载失败：" + (err instanceof Error ? err.message : "未知错误")
       );
     }
-  }, [actualJsApiKey, actualSecurityCode, initMap]);
+  }, [jsApiKey, securityCode, initMap]);
   // 自动加载地图 - 如果有密钥数据就自动加载
   useEffect(() => {
     if (
-      actualJsApiKey &&
-      actualSecurityCode &&
+      jsApiKey &&
+      securityCode &&
       !mapInitialized &&
       !mapLoading
     ) {
@@ -269,8 +228,8 @@ export default function AmapAddressCalculator() {
       loadAmapScript();
     }
   }, [
-    actualJsApiKey,
-    actualSecurityCode,
+    jsApiKey,
+    securityCode,
     mapInitialized,
     mapLoading,
     loadAmapScript,
@@ -288,13 +247,13 @@ export default function AmapAddressCalculator() {
         console.warn("手动位置解析失败，尝试其他定位方式");
       }
     } // 尝试使用高德地图的IP定位服务
-    if (actualRestApiKey.trim()) {
+    if (restApiKey.trim()) {
       try {
         const requestOptions: RequestInit = {
           method: "GET",
           redirect: "follow",
         };
-        const ipLocationUrl = `https://restapi.amap.com/v3/ip?key=${actualRestApiKey}`;
+        const ipLocationUrl = `https://restapi.amap.com/v3/ip?key=${restApiKey}`;
         const response = await fetch(ipLocationUrl, requestOptions);
 
         if (!response.ok) {
@@ -390,7 +349,7 @@ export default function AmapAddressCalculator() {
   ): Promise<{ lng: number; lat: number }> => {
     const url = `https://restapi.amap.com/v3/geocode/geo?address=${encodeURIComponent(
       address
-    )}&key=${actualRestApiKey}&batch=false&output=JSON`;
+    )}&key=${restApiKey}&batch=false&output=JSON`;
 
     try {
       const response = await fetch(url);
@@ -570,9 +529,9 @@ export default function AmapAddressCalculator() {
   // 主处理函数
   const processAddresses = async () => {
     if (
-      !actualJsApiKey.trim() ||
-      !actualRestApiKey.trim() ||
-      !actualSecurityCode.trim()
+      !jsApiKey.trim() ||
+      !restApiKey.trim() ||
+      !securityCode.trim()
     ) {
       setError("请先输入JS API Key、REST API Key和安全密钥");
       return;
@@ -730,9 +689,6 @@ export default function AmapAddressCalculator() {
     link.download = "地址距离计算结果.csv";
     link.click();
   };
-  const actualRequestLimit = requestLimit || defaultRequestLimit;
-  const actualRequestDelay = requestDelay || defaultRequestDelay;
-
   return (
     <div className="container mx-auto p-4 max-w-7xl">
       {" "}
@@ -816,7 +772,7 @@ export default function AmapAddressCalculator() {
         <div className="space-y-4">
           {" "}
           {/* 快速开始检查 */}
-          {(!actualJsApiKey || !actualRestApiKey || !actualSecurityCode) && (
+          {(!jsApiKey || !restApiKey || !securityCode) && (
             <Card className="border-orange-200 bg-orange-50">
               <CardHeader>
                 <CardTitle className="text-orange-800 text-lg">
@@ -826,11 +782,11 @@ export default function AmapAddressCalculator() {
               <CardContent className="text-sm text-orange-700">
                 <p className="mb-2">需要先配置API密钥才能使用此功能：</p>
                 <div className="space-y-1">
-                  {!actualJsApiKey && <p>• 缺少JS API Key（用于地图显示）</p>}
-                  {!actualRestApiKey && (
+                  {!jsApiKey && <p>• 缺少JS API Key（用于地图显示）</p>}
+                  {!restApiKey && (
                     <p>• 缺少REST API Key（用于地址解析）</p>
                   )}
-                  {!actualSecurityCode && <p>• 缺少安全密钥</p>}
+                  {!securityCode && <p>• 缺少安全密钥</p>}
                 </div>
                 <div className="mt-3">
                   <Link href="/settings">
@@ -846,31 +802,8 @@ export default function AmapAddressCalculator() {
               </CardContent>
             </Card>
           )}
-          {/* 显示默认密钥使用状态 */}
-          {(usingDefaults.jsApi ||
-            usingDefaults.restApi ||
-            usingDefaults.security) && (
-            <Card className="border-blue-200 bg-blue-50">
-              <CardHeader>
-                <CardTitle className="text-blue-800 text-lg">
-                  ℹ️ 使用默认配置
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-blue-700">
-                <p className="mb-2">当前正在使用环境变量中的默认密钥：</p>
-                <div className="space-y-1">
-                  {usingDefaults.jsApi && <p>• 使用默认JS API Key</p>}
-                  {usingDefaults.restApi && <p>• 使用默认REST API Key</p>}
-                  {usingDefaults.security && <p>• 使用默认安全密钥</p>}
-                </div>
-                <p className="mt-2 text-xs">
-                  如需使用自己的密钥，请在设置页面进行配置。
-                </p>
-              </CardContent>
-            </Card>
-          )}{" "}
           {/* 地图加载按钮 */}
-          {actualJsApiKey && actualSecurityCode && (
+          {jsApiKey && securityCode && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
