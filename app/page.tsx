@@ -773,14 +773,17 @@ export default function AmapAddressCalculator() {
           {" "}
           {/* 快速开始检查 */}
           {(!jsApiKey || !restApiKey || !securityCode) && (
-            <Card className="border-orange-200 bg-orange-50">
+            <Card className="border-amber-300 bg-amber-50">
               <CardHeader>
-                <CardTitle className="text-orange-800 text-lg">
-                  ⚠️ 配置提醒
+                <CardTitle className="text-amber-800 text-lg">
+                  ⚠️ 请先配置API密钥
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-orange-700">
-                <p className="mb-2">需要先配置API密钥才能使用此功能：</p>
+              <CardContent className="text-sm text-amber-700">
+                <p className="mb-2">
+                  由于高德地图官方通知，为避免API调用量被滥用，<strong>本应用不再提供默认API密钥</strong>。
+                  请您自行配置：
+                </p>
                 <div className="space-y-1">
                   {!jsApiKey && <p>• 缺少JS API Key（用于地图显示）</p>}
                   {!restApiKey && (
@@ -788,14 +791,17 @@ export default function AmapAddressCalculator() {
                   )}
                   {!securityCode && <p>• 缺少安全密钥</p>}
                 </div>
+                <p className="mt-2 text-xs">
+                  💡 高德地图提供免费API服务，个人用户每日有足够的调用额度。
+                </p>
                 <div className="mt-3">
                   <Link href="/settings">
                     <Button
                       size="sm"
-                      className="bg-orange-600 hover:bg-orange-700"
+                      className="bg-amber-600 hover:bg-amber-700"
                     >
                       <Settings className="w-4 h-4 mr-2" />
-                      前往设置
+                      前往设置配置
                     </Button>
                   </Link>
                 </div>
