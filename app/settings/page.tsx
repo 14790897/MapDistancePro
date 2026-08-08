@@ -151,7 +151,7 @@ export default function SettingsPage() {
                   ⚠️ 请先配置您的高德地图 API 密钥
                 </p>
                 <p className="text-sm text-amber-700 leading-relaxed">
-                  为了保证服务质量并避免API调用量被滥用，<strong>本应用不再提供默认API密钥</strong>。
+                  由于<strong>高德地图官方通知</strong>，为避免API调用量被滥用，<strong>本应用不再提供默认API密钥</strong>。
                   请您自行前往{" "}
                   <a
                     href="https://console.amap.com/"
